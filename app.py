@@ -1,30 +1,152 @@
 import streamlit as st
-import base64 # Necesario para el carrusel CSS (simulado)
+import base64
+
+# --- TRADUCCIONES Y CONTENIDO ---
+# Todo el texto de la web se almacena aquí
+content = {
+    'es': {
+        'page_title': "Portfolio de Franco Clementino",
+        'page_icon': "📊",
+        'nav_projects': "Proyectos",
+        'nav_clients': "Clientes",
+        'intro_title': "Franco Clementino",
+        'intro_subtitle': "Data Analyst & Business Intelligence Developer",
+        'intro_body': """
+        ¡Bienvenido a mi portfolio! Soy un apasionado del análisis de datos con experiencia
+        en transformar datos crudos en insights accionables.
+
+        Me especializo en la creación de dashboards interactivos, automatización de procesos
+        y desarrollo de soluciones de BI que impulsan la toma de decisiones.
+        """,
+        'linkedin_button': "Contactar por LinkedIn",
+        'projects_header': "Proyectos Destacados",
+        'clients_header': "Clientes que confían en nosotros",
+        'projects_list': [
+            {
+                "titulo": "Transformación Digital Petrolera",
+                "descripcion": "Desarrollamos la estrategia integral de datos de una compañía petrolera, con espacios digitales de trabajo colaborativo en la nube, dashboards de alto nivel y automatizaciones de procesos internos.",
+                "imagen_url": "https://placehold.co/600x400/3498DB/FFFFFF?text=Proyecto+Petrolero",
+                "tags": ["Power BI", "Azure", "Python"]
+            },
+            {
+                "titulo": "Dashboard de Rentabilidad Oil&Gas",
+                "descripcion": "Implementamos una estrategia de datos que permite a la gerencia monitorear la rentabilidad de sus negocios a través de reportes dinámicos en tiempo real.",
+                "imagen_url": "https://placehold.co/600x400/2ECC71/FFFFFF?text=Proyecto+Rentabilidad",
+                "tags": ["Power BI", "SQL Server", "Power Automate"]
+            },
+            {
+                "titulo": "Aplicación Mobile para Relevamientos",
+                "descripcion": "Creamos una aplicación tablet para el relevamiento en tiempo real del estado de instalaciones en yacimientos, con base de datos en la nube y reportes en Power BI.",
+                "imagen_url": "https://placehold.co/600x400/E74C3C/FFFFFF?text=Proyecto+App+Mobile",
+                "tags": ["Power Apps", "SharePoint", "Dataverse"]
+            }
+        ],
+        'clients_list': [
+            {"nombre": "Cliente A", "url": "https://placehold.co/200x100/CCCCCC/999999?text=LOGO+CLIENTE+A"},
+            {"nombre": "Cliente B", "url": "https://placehold.co/200x100/CCCCCC/999999?text=LOGO+CLIENTE+B"},
+            {"nombre": "Cliente C", "url": "https://placehold.co/200x100/CCCCCC/999999?text=LOGO+CLIENTE+C"},
+            {"nombre": "Cliente D", "url": "https://placehold.co/200x100/CCCCCC/999999?text=LOGO+CLIENTE+D"},
+            {"nombre": "Cliente E", "url": "https://placehold.co/200x100/CCCCCC/999999?text=LOGO+CLIENTE+E"},
+            {"nombre": "Cliente F", "url": "https://placehold.co/200x100/CCCCCC/999999?text=LOGO+CLIENTE+F"},
+        ]
+    },
+    'en': {
+        'page_title': "Franco Clementino's Portfolio",
+        'page_icon': "📊",
+        'nav_projects': "Projects",
+        'nav_clients': "Clients",
+        'intro_title': "Franco Clementino",
+        'intro_subtitle': "Data Analyst & Business Intelligence Developer",
+        'intro_body': """
+        Welcome to my portfolio! I am a data analysis enthusiast with experience
+        in transforming raw data into actionable insights.
+
+        I specialize in creating interactive dashboards, process automation,
+        and developing BI solutions that drive decision-making.
+        """,
+        'linkedin_button': "Contact via LinkedIn",
+        'projects_header': "Featured Projects",
+        'clients_header': "Clients Who Trust Us",
+        'projects_list': [
+            {
+                "titulo": "Digital Transformation in Oil & Gas",
+                "descripcion": "We developed a comprehensive data strategy for an oil company, including cloud-based collaborative digital workspaces, high-level dashboards, and internal process automation.",
+                "imagen_url": "https://placehold.co/600x400/3498DB/FFFFFF?text=Oil+Project",
+                "tags": ["Power BI", "Azure", "Python"]
+            },
+            {
+                "titulo": "Oil&Gas Profitability Dashboard",
+                "descripcion": "We implemented a data strategy that allows management to monitor business profitability through dynamic, real-time reports.",
+                "imagen_url": "https://placehold.co/600x400/2ECC71/FFFFFF?text=Profitability+Project",
+                "tags": ["Power BI", "SQL Server", "Power Automate"]
+            },
+            {
+                "titulo": "Mobile App for Field Surveys",
+                "descripcion": "We created a tablet application for real-time surveying of facility conditions in oil fields, with a cloud database and Power BI reports.",
+                "imagen_url": "https://placehold.co/600x400/E74C3C/FFFFFF?text=Mobile+App+Project",
+                "tags": ["Power Apps", "SharePoint", "Dataverse"]
+            }
+        ],
+        'clients_list': [
+            {"nombre": "Client A", "url": "https://placehold.co/200x100/CCCCCC/999999?text=CLIENT+A+LOGO"},
+            {"nombre": "Client B", "url": "https://placehold.co/200x100/CCCCCC/999999?text=CLIENT+B+LOGO"},
+            {"nombre": "Client C", "url": "https://placehold.co/200x100/CCCCCC/999999?text=CLIENT+C+LOGO"},
+            {"nombre": "Client D", "url": "https://placehold.co/200x100/CCCCCC/999999?text=CLIENT+D+LOGO"},
+            {"nombre": "Client E", "url": "https://placehold.co/200x100/CCCCCC/999999?text=CLIENT+E+LOGO"},
+            {"nombre": "Client F", "url": "https://placehold.co/200x100/CCCCCC/999999?text=CLIENT+F+LOGO"},
+        ]
+    }
+}
+
+# --- INICIALIZACIÓN DE ESTADO ---
+# Usamos session_state para guardar el idioma seleccionado
+if 'lang' not in st.session_state:
+    st.session_state.lang = 'es'
+
+# Función para cambiar el idioma
+def set_lang(lang_code):
+    st.session_state.lang = lang_code
+
+# Seleccionar el diccionario de contenido actual
+current_content = content[st.session_state.lang]
 
 # --- Configuración de la Página ---
-# Usamos 'wide' para que el contenido ocupe más espacio
 st.set_page_config(
-    page_title="Portfolio de Franco Clementino",
-    page_icon="📊",
+    page_title=current_content['page_title'],
+    page_icon=current_content['page_icon'],
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
 # --- INYECTAR CSS PERSONALIZADO ---
-# Esto es para mejorar el diseño, centrar logos y hacer el carrusel
 def local_css(file_name):
     with open(file_name) as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-# Vamos a crear un archivo CSS simple
+# CSS para el fondo, carrusel y estilos de proyecto
 css_content = """
-/* Estilo para los contenedores de proyectos */
+/* --- IMAGEN DE FONDO --- */
+/* Usamos un selector específico para el contenedor principal de Streamlit */
+[data-testid="stAppViewContainer"] {
+    background-image: url("https://www.toptal.com/designers/subtlepatterns/uploads/light-sketch-grey.png");
+    background-size: cover; /* Cubre todo el espacio */
+    background-repeat: repeat; /* Repite la imagen (para patrones) */
+    background-attachment: fixed; /* Fija el fondo al hacer scroll */
+}
+
+/* --- Hacemos los contenedores de proyecto y header semi-transparentes --- */
+/* Esto hace que el fondo se vea a través de los elementos */
+[data-testid="stHeader"], .project-container {
+    background-color: rgba(255, 255, 255, 0.85); /* Blanco con 85% opacidad */
+    backdrop-filter: blur(5px); /* Efecto "vidrio esmerilado" */
+}
+
+/* --- Estilo para los contenedores de proyectos --- */
 .project-container {
     border: 1px solid #e0e0e0;
     border-radius: 12px;
     padding: 24px;
     margin-bottom: 24px;
-    background-color: #f9f9f9;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     transition: all 0.3s ease;
 }
@@ -33,34 +155,34 @@ css_content = """
     transform: translateY(-5px);
 }
 
-/* Ocultar la barra de scroll del carrusel */
+/* --- Ocultar la barra de scroll del carrusel --- */
 .logo-carousel-container {
     display: flex;
-    overflow-x: auto; /* Permite scroll horizontal */
-    padding-bottom: 20px; /* Espacio para que la sombra no se corte */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none;  /* IE y Edge */
+    overflow-x: auto;
+    padding-bottom: 20px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 .logo-carousel-container::-webkit-scrollbar {
-    display: none; /* Chrome, Safari y Opera */
+    display: none;
 }
 
-/* Estilo de cada logo */
+/* --- Estilo de cada logo --- */
 .logo-item {
-    flex-shrink: 0; /* Evita que los logos se encojan */
-    margin-right: 40px; /* Espacio entre logos */
+    flex-shrink: 0;
+    margin-right: 40px;
     text-align: center;
-    filter: grayscale(100%); /* Los hacemos blanco y negro */
+    filter: grayscale(100%);
     opacity: 0.6;
     transition: all 0.3s ease;
 }
 .logo-item:hover {
-    filter: grayscale(0%); /* Color al pasar el mouse */
+    filter: grayscale(0%);
     opacity: 1.0;
     transform: scale(1.1);
 }
 .logo-item img {
-    max-height: 60px; /* Altura máxima para logos */
+    max-height: 60px;
     width: auto;
 }
 .logo-item p {
@@ -69,77 +191,70 @@ css_content = """
     font-weight: 500;
 }
 
-/* Centrar el título de clientes */
+/* --- Centrar el título de clientes --- */
 .clients-header {
     text-align: center;
     margin-bottom: 30px;
 }
 """
 
-# Escribir el CSS a un archivo temporal y cargarlo
+# Escribir el CSS a un archivo y cargarlo
 with open("style.css", "w") as f:
     f.write(css_content)
-
 local_css("style.css")
 
 
-# --- SECCIÓN DE INTRODUCCIÓN ---
+# --- BARRA DE NAVEGACIÓN Y LENGUAJE ---
+col_nav, col_lang = st.columns([4, 1])
+
+with col_nav:
+    # Usamos markdown con HTML para crear los enlaces de ancla
+    st.markdown(f"""
+    <div style="margin-top: 10px;">
+        <a href="#proyectos" style="text-decoration: none; color: #333; margin-right: 25px; font-weight: 500;">{current_content['nav_projects']}</a>
+        <a href="#clientes" style="text-decoration: none; color: #333; font-weight: 500;">{current_content['nav_clients']}</a>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_lang:
+    # Botones de radio para seleccionar idioma
+    lang_options = {'es': 'Español', 'en': 'English'}
+    selected_lang = st.radio(
+        "Idioma/Language",
+        options=['es', 'en'],
+        format_func=lang_options.get,
+        index=0 if st.session_state.lang == 'es' else 1,
+        horizontal=True,
+        label_visibility="collapsed",
+        key="lang_selector"
+    )
+    
+    # Si el idioma cambia, actualiza el estado
+    if st.session_state.lang != selected_lang:
+        st.session_state.lang = selected_lang
+        st.rerun() # Recarga la página para mostrar el nuevo idioma
+
+
+# --- SECCIÓN DE INTRODUCCIÓN (Sin foto) ---
 with st.container():
-    col1, col2 = st.columns([1, 2], gap="large")
-
-    with col1:
-        # Reemplaza con una URL de tu propia foto
-        st.image("https://placehold.co/400x400/EFEFEF/333333?text=Tu+Foto+Aqui",
-                 width=300,
-                 use_column_width="auto",
-                 caption="Franco Clementino")
-
-    with col2:
-        st.title("Franco Clementino")
-        st.subheader("Data Analyst & Business Intelligence Developer")
-        st.write("""
-        ¡Bienvenido a mi portfolio! Soy un apasionado del análisis de datos con experiencia
-        en transformar datos crudos en insights accionables.
-
-        Me especializo en la creación de dashboards interactivos, automatización de procesos
-        y desarrollo de soluciones de BI que impulsan la toma de decisiones.
-        """)
-        st.link_button("Contactar por LinkedIn", "https://www.linkedin.com/in/francoclementino/")
+    st.title(current_content['intro_title'])
+    st.subheader(current_content['intro_subtitle'])
+    st.write(current_content['intro_body'])
+    st.link_button(current_content['linkedin_button'], "https://www.linkedin.com/in/francoclementino/")
 
 st.divider()
 
 # --- SECCIÓN DE PROYECTOS ---
-st.header("Proyectos Destacados", anchor=False)
+# El "anchor" crea el punto de anclaje para el enlace "#proyectos"
+st.header(current_content['projects_header'], anchor="proyectos")
 
-# Datos de los proyectos (reemplaza con los tuyos)
-proyectos = [
-    {
-        "titulo": "Transformación Digital Petrolera",
-        "descripcion": "Desarrollamos la estrategia integral de datos de una compañía petrolera, con espacios digitales de trabajo colaborativo en la nube, dashboards de alto nivel y automatizaciones de procesos internos.",
-        "imagen_url": "https://placehold.co/600x400/3498DB/FFFFFF?text=Proyecto+Petrolero",
-        "tags": ["Power BI", "Azure", "Python"]
-    },
-    {
-        "titulo": "Dashboard de Rentabilidad Oil&Gas",
-        "descripcion": "Implementamos una estrategia de datos que permite a la gerencia monitorear la rentabilidad de sus negocios a través de reportes dinámicos en tiempo real.",
-        "imagen_url": "https://placehold.co/600x400/2ECC71/FFFFFF?text=Proyecto+Rentabilidad",
-        "tags": ["Power BI", "SQL Server", "Power Automate"]
-    },
-    {
-        "titulo": "Aplicación Mobile para Relevamientos",
-        "descripcion": "Creamos una aplicación tablet para el relevamiento en tiempo real del estado de instalaciones en yacimientos, con base de datos en la nube y reportes en Power BI.",
-        "imagen_url": "https://placehold.co/600x400/E74C3C/FFFFFF?text=Proyecto+App+Mobile",
-        "tags": ["Power Apps", "SharePoint", "Dataverse"]
-    }
-]
+proyectos = current_content['projects_list']
 
 # Iterar y mostrar cada proyecto
 for i, proyecto in enumerate(proyectos):
     with st.container():
-        # Aplicamos la clase CSS que definimos
         st.markdown(f'<div class="project-container">', unsafe_allow_html=True)
-
-        # Alternar el orden de imagen y texto para variar el layout
+        
         if i % 2 == 0:
             col1, col2 = st.columns([1, 2], gap="large")
         else:
@@ -151,32 +266,19 @@ for i, proyecto in enumerate(proyectos):
         with col2:
             st.subheader(proyecto["titulo"], anchor=False)
             st.write(proyecto["descripcion"])
-            
-            # Mostrar tags/tecnologías
             for tag in proyecto["tags"]:
                 st.button(tag, disabled=True, key=f"tag_{i}_{tag}")
-
+        
         st.markdown(f'</div>', unsafe_allow_html=True)
-
 
 st.divider()
 
 # --- SECCIÓN DE CLIENTES (CARRUSEL SIMULADO) ---
-st.markdown('<h2 class="clients-header">Clientes que confían en nosotros</h2>', unsafe_allow_html=True)
+# El "anchor" crea el punto de anclaje para el enlace "#clientes"
+st.header(current_content['clients_header'], anchor="clientes")
 
-# Lista de logos (reemplaza con los nombres y URLs de los logos)
-logos = [
-    {"nombre": "Cliente A", "url": "https://placehold.co/200x100/CCCCCC/999999?text=LOGO+CLIENTE+A"},
-    {"nombre": "Cliente B", "url": "https://placehold.co/200x100/CCCCCC/999999?text=LOGO+CLIENTE+B"},
-    {"nombre": "Cliente C", "url": "https://placehold.co/200x100/CCCCCC/999999?text=LOGO+CLIENTE+C"},
-    {"nombre": "Cliente D", "url": "https://placehold.co/200x100/CCCCCC/999999?text=LOGO+CLIENTE+D"},
-    {"nombre": "Cliente E", "url": "https://placehold.co/200x100/CCCCCC/999999?text=LOGO+CLIENTE+E"},
-    {"nombre": "Cliente F", "url": "https://placehold.co/200x100/CCCCCC/999999?text=LOGO+CLIENTE+F"},
-]
+logos = current_content['clients_list']
 
-# Streamlit no tiene un "carrusel" nativo.
-# Usamos un contenedor con scroll horizontal (definido en el CSS)
-# para mostrar los logos de forma elegante.
 logo_html = '<div class="logo-carousel-container">'
 for logo in logos:
     logo_html += f"""
@@ -188,3 +290,4 @@ for logo in logos:
 logo_html += '</div>'
 
 st.markdown(logo_html, unsafe_allow_html=True)
+
