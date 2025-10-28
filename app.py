@@ -99,13 +99,8 @@ content = {
 }
 
 # --- INICIALIZACIÓN DE ESTADO ---
-# Usamos session_state para guardar el idioma seleccionado
 if 'lang' not in st.session_state:
     st.session_state.lang = 'es'
-
-# Función para cambiar el idioma
-def set_lang(lang_code):
-    st.session_state.lang = lang_code
 
 # Seleccionar el diccionario de contenido actual
 current_content = content[st.session_state.lang]
@@ -120,29 +115,48 @@ st.set_page_config(
 
 # --- INYECTAR CSS PERSONALIZADO ---
 def local_css(file_name):
-    with open(file_name) as f:
-        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    try:
+        with open(file_name, "r", encoding="utf-8") as f:
+            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    except FileNotFoundError:
+        st.error(f"Archivo CSS '{file_name}' no encontrado. Creando...")
+        with open(file_name, "w", encoding="utf-8") as f:
+            f.write(css_content) # Escribe el contenido si no existe
+        local_css(file_name) # Vuelve a intentarlo
 
-# CSS para el fondo, carrusel y estilos de proyecto
+# CSS para el fondo, carrusel, estilos de proyecto y HEADER FIJO
 css_content = """
 /* --- IMAGEN DE FONDO --- */
-/* Usamos un selector específico para el contenedor principal de Streamlit */
 [data-testid="stAppViewContainer"] {
     background-image: url("https://www.toptal.com/designers/subtlepatterns/uploads/light-sketch-grey.png");
-    background-size: cover; /* Cubre todo el espacio */
-    background-repeat: repeat; /* Repite la imagen (para patrones) */
-    background-attachment: fixed; /* Fija el fondo al hacer scroll */
+    background-size: cover;
+    background-repeat: repeat;
+    background-attachment: fixed;
 }
 
-/* --- Hacemos los contenedores de proyecto y header semi-transparentes --- */
-/* Esto hace que el fondo se vea a través de los elementos */
-[data-testid="stHeader"], .project-container {
-    background-color: rgba(255, 255, 255, 0.85); /* Blanco con 85% opacidad */
-    backdrop-filter: blur(5px); /* Efecto "vidrio esmerilado" */
+/* --- HEADER FIJO (STICKY) --- */
+.sticky-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.95); /* Fondo blanco semi-transparente */
+    padding: 10px 2rem; /* Padding (2rem es ~32px) */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Sombra sutil */
+    backdrop-filter: blur(10px);
 }
 
-/* --- Estilo para los contenedores de proyectos --- */
+/* --- PADDING SUPERIOR PARA EL CONTENIDO --- */
+/* Evita que el contenido principal quede oculto detrás del header fijo */
+.main-content-padding {
+    padding-top: 80px; /* Ajusta esta altura según sea necesario */
+}
+
+/* --- Contenedores semi-transparentes --- */
 .project-container {
+    background-color: rgba(255, 255, 255, 0.85); /* Blanco con 85% opacidad */
+    backdrop-filter: blur(5px);
     border: 1px solid #e0e0e0;
     border-radius: 12px;
     padding: 24px;
@@ -199,48 +213,57 @@ css_content = """
 """
 
 # Escribir el CSS a un archivo y cargarlo
-with open("style.css", "w") as f:
+with open("style.css", "w", encoding="utf-8") as f:
     f.write(css_content)
 local_css("style.css")
 
 
-# --- BARRA DE NAVEGACIÓN Y LENGUAJE ---
+# --- BARRA DE NAVEGACIÓN Y LENGUAJE (FIJA) ---
+# Envolvemos las columnas en un contenedor markdown con la clase "sticky-header"
+st.markdown('<div class="sticky-header">', unsafe_allow_html=True)
 col_nav, col_lang = st.columns([4, 1])
 
 with col_nav:
     # Usamos markdown con HTML para crear los enlaces de ancla
     st.markdown(f"""
     <div style="margin-top: 10px;">
-        <a href="#proyectos" style="text-decoration: none; color: #333; margin-right: 25px; font-weight: 500;">{current_content['nav_projects']}</a>
-        <a href="#clientes" style="text-decoration: none; color: #333; font-weight: 500;">{current_content['nav_clients']}</a>
+        <a href="#proyectos" style="text-decoration: none; color: #333; margin-right: 25px; font-weight: 500; font-size: 1.1rem;">{current_content['nav_projects']}</a>
+        <a href="#clientes" style="text-decoration: none; color: #333; font-weight: 500; font-size: 1.1rem;">{current_content['nav_clients']}</a>
     </div>
     """, unsafe_allow_html=True)
 
 with col_lang:
-    # Botones de radio para seleccionar idioma
-    lang_options = {'es': 'Español', 'en': 'English'}
+    # Botones de radio para seleccionar idioma con BANDERAS
+    lang_options = {'es': 'Español 🇪🇸', 'en': 'English 🇬🇧'} # <-- CAMBIO AQUÍ
+    
     selected_lang = st.radio(
         "Idioma/Language",
         options=['es', 'en'],
-        format_func=lang_options.get,
+        format_func=lang_options.get, # Usa el diccionario para mostrar "Español 🇪🇸"
         index=0 if st.session_state.lang == 'es' else 1,
         horizontal=True,
         label_visibility="collapsed",
         key="lang_selector"
     )
     
-    # Si el idioma cambia, actualiza el estado
+    # Si el idioma cambia, actualiza el estado y recarga
     if st.session_state.lang != selected_lang:
         st.session_state.lang = selected_lang
-        st.rerun() # Recarga la página para mostrar el nuevo idioma
+        st.rerun()
+
+st.markdown('</div>', unsafe_allow_html=True) # Cierra el div del header fijo
 
 
-# --- SECCIÓN DE INTRODUCCIÓN (Sin foto) ---
+# --- SECCIÓN DE INTRODUCCIÓN (Con padding) ---
+# Envolvemos el contenido principal en un div con padding
+st.markdown('<div class="main-content-padding">', unsafe_allow_html=True)
 with st.container():
     st.title(current_content['intro_title'])
     st.subheader(current_content['intro_subtitle'])
     st.write(current_content['intro_body'])
     st.link_button(current_content['linkedin_button'], "https://www.linkedin.com/in/francoclementino/")
+st.markdown('</div>', unsafe_allow_html=True) # Cierra el div del padding
+
 
 st.divider()
 
@@ -289,5 +312,7 @@ for logo in logos:
     """
 logo_html += '</div>'
 
+# --- ¡LA CORRECCIÓN MÁS IMPORTANTE ESTÁ AQUÍ! ---
+# Asegúrate de que esta línea esté EXACTAMENTE así
 st.markdown(logo_html, unsafe_allow_html=True)
 
